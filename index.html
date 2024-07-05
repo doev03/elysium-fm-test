@@ -157,6 +157,7 @@
                 breakAudio.volume = 0.3;
                 audioVolumeIn(breakAudio, 0.5, 25);
                 fadeInAnimationContainer();
+                animate()
                 // Ensure other actions that don't require direct user action are called after successful playback.
             }).catch(error => {
                 console.error('Playback was prevented:', error);
