@@ -94,19 +94,6 @@
     loadAnimationScript(animation);
     const breakAudio = new Audio(audioFiles[Math.floor(Math.random() * audioFiles.length)]);
 
-    // function loadAnimationScript(animation) {
-    //     const animationContainer = document.getElementById('animation-container');
-    //     animationContainer.innerHTML = ''; // Очистка предыдущей анимации
-    //
-    //     const script = document.createElement('script');
-    //     script.src = animation.script;
-    //     script.onerror = function() {
-    //         console.error('Failed to load script:', animation.script);
-    //     };
-    //
-    //     document.body.appendChild(script);
-    // }
-
     function loadAnimationScript(animation) {
         console.log(animation)
         const animationContainer = document.getElementById('animation-container');
@@ -160,7 +147,7 @@
     document.getElementById('play-button').addEventListener('click', function () {
         this.style.opacity = '0'; // Start fade out
         setTimeout(() => {
-            this.style.display = 'none'; // Hide after fade out
+            this.remove(); // удалить кнопку после скрытия
         }, 2000);
 
         // player.play();
