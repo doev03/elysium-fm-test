@@ -147,19 +147,28 @@
     document.getElementById('play-button').addEventListener('click', function () {
         this.style.opacity = '0'; // Start fade out
         setTimeout(() => {
-            this.remove(); // удалить кнопку после скрытия
+            this.remove(); // Remove the button after fading out
         }, 2000);
 
-        // player.play();
+        // Attempt to play breakAudio directly in the click event handler.
+        try {
+            breakAudio.play().then(() => {
+                console.log("Playback successfully started");
+                breakAudio.volume = 0.3;
+                audioVolumeIn(breakAudio, 0.5, 25);
+                fadeInAnimationContainer();
+                // Ensure other actions that don't require direct user action are called after successful playback.
+            }).catch(error => {
+                console.error('Playback was prevented:', error);
+            });
+        } catch (error) {
+            console.error('Error attempting to play audio:', error);
+        }
+
+        // Attempt to play the main player audio, if necessary, in a similar direct manner.
         player.play().then(() => {
             audioVolumeIn(audioElement, 1, 300);
-            // You can also initiate animations or other actions here
-
-            breakAudio.play();
-            breakAudio.volume = 0.3
-            audioVolumeIn(breakAudio, 0.5, 25);
-            fadeInAnimationContainer();
-            animate();
+            // Additional actions after successful playback of the main audio.
         }).catch(error => {
             console.error('Audio play was prevented:', error);
         });
