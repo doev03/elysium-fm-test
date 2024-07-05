@@ -63,7 +63,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="./icecast-metadata-player-1.17.3.main.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script src="https://atuin.ru/demo/webgl/three.min.js"></script>
 <script>
     eruda.init();
     const audioElement = document.getElementById('radio-stream');
@@ -79,8 +78,9 @@
         );
 
     const animations = [
-        { id: 'bg-37', script: './bg-37.js', texture: './noise.png' },
-        { id: 'bg-25', script: './bg-25.js', texture: './noise2.png' }
+        { id: 'bg-37', script: './bg-37.js' },
+        { id: 'bg-25', script: './bg-25.js' },
+        { id: 'bg-truchet', script: './bg-truchet.js' },
     ];
     const audioFiles = [
         'Elysium Radio Break 1.m4a',
@@ -114,6 +114,7 @@
 
         const script = document.createElement('script');
         script.src = animation.script;
+        script.type = "module";
 
         script.onerror = function() {
             console.error('Failed to load script:', animation.script);
@@ -155,7 +156,10 @@
         }, d); // Adjust interval timing as needed
     }
 
-
+    async function startAnimation() {
+        let {animate} = await import(animation.script);
+        animate();
+    }
 
     document.getElementById('play-button').addEventListener('click', function () {
         this.style.opacity = '0'; // Start fade out
@@ -172,7 +176,7 @@
             breakAudio.volume = 0.3
             audioVolumeIn(breakAudio, 0.5, 25);
             fadeInAnimationContainer();
-            animate();
+            startAnimation();
         }).catch(error => {
             console.error('Audio play was prevented:', error);
         });

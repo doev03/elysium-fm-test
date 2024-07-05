@@ -1,3 +1,5 @@
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js";
+
 const shader = {
     vertex: `void main() {
 	gl_Position = vec4( position, 1.0 );
@@ -376,7 +378,7 @@ function onWindowResize( event ) {
     uniforms.u_resolution.value.x = renderer.domElement.width;
     uniforms.u_resolution.value.y = renderer.domElement.height;
 }
-function animate(delta) {
+export function animate(delta) {
     requestAnimationFrame( animate );
     render(delta);
 }
