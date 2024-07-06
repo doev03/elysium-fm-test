@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.module.js";
+import * as THREE from "./scripts/three.module.min.js";
 
 const shader = {
     vertex: `void main() {
@@ -445,7 +445,7 @@ under the fragment shader.
 
         scene = new THREE.Scene();
 
-        var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
+        var geometry = new THREE.PlaneGeometry( 2, 2 );
 
         uniforms = {
             u_time: { type: "f", value: 1.0 },
