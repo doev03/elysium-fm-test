@@ -345,7 +345,7 @@ function init() {
     camera = new THREE.Camera();
     camera.position.z = 1;
     scene = new THREE.Scene();
-    var geometry = new THREE.PlaneGeometry( 2, 2 );
+    var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
     uniforms = {
         u_time: { type: "f", value: 1.0 },
         u_resolution: { type: "v2", value: new THREE.Vector2() },
