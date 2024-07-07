@@ -1,10 +1,13 @@
-import * as THREE from "./scripts/three.module.min.js";
+<script setup>
+import * as THREE from 'three'
+import noise from './noise.png'
+import { onMounted } from 'vue'
 
 const shader = {
-    vertex: `void main() {
+  vertex: `void main() {
 	gl_Position = vec4( position, 1.0 );
     }`,
-    fragment: `uniform vec2 u_resolution;
+  fragment: `uniform vec2 u_resolution;
     uniform float u_time;
     uniform vec2 u_mouse;
   uniform sampler2D u_noise;
@@ -412,78 +415,88 @@ float triNoise3D( vec3 p, float spd , float time){
 
 
     }`
-};
+}
 /*
 Most of the stuff in here is just bootstrapping. Essentially it's just
-setting ThreeJS up so that it renders a flat surface upon which to draw
-the shader. The only thing to see here really is the uniforms sent to
+setting ThreeJS up so that it renders a flat surface upon which to draw 
+the shader. The only thing to see here really is the uniforms sent to 
 the shader. Apart from that all of the magic happens in the HTML view
 under the fragment shader.
 */
 
+let container
+let camera, scene, renderer
+let uniforms
+let texture, environment
 
-    let container;
-    let camera, scene, renderer;
-    let uniforms;
-    let material;
+function load() {
+  let loader = new THREE.TextureLoader()
+  loader.setCrossOrigin('anonymous')
+  loader.load(noise, (tex) => {
+    environment = tex
+    environment.wrapS = THREE.RepeatWrapping
+    environment.wrapT = THREE.RepeatWrapping
+    init()
+    animate()
+  })
+}
 
-    let loader=new THREE.TextureLoader();
-    let texture, environment;
-    loader.setCrossOrigin("anonymous");
-    loader.load('./noise.png', (tex) => {
-        environment = tex;
-        environment.wrapS = THREE.RepeatWrapping;
-        environment.wrapT = THREE.RepeatWrapping;
-        init();
-    });
+function init() {
+  container = document.getElementById('bg-37')
 
-    function init() {
-        container = document.getElementById('animation-container');
+  camera = new THREE.Camera()
+  camera.position.z = 1
 
-        camera = new THREE.Camera();
-        camera.position.z = 1;
+  scene = new THREE.Scene()
 
-        scene = new THREE.Scene();
+  var geometry = new THREE.PlaneGeometry(2, 2)
 
-        var geometry = new THREE.PlaneBufferGeometry( 2, 2 );
+  uniforms = {
+    u_time: { type: 'f', value: 1.0 },
+    u_resolution: { type: 'v2', value: new THREE.Vector2() },
+    u_noise: { type: 't', value: texture },
+    u_env: { type: 't', value: environment },
+    u_mouse: { type: 'v2', value: new THREE.Vector2() }
+  }
 
-        uniforms = {
-            u_time: { type: "f", value: 1.0 },
-            u_resolution: { type: "v2", value: new THREE.Vector2() },
-            u_noise: { type: "t", value: texture },
-            u_env: { type: "t", value: environment },
-            u_mouse: { type: "v2", value: new THREE.Vector2() }
-        };
+  var material = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: shader.vertex,
+    fragmentShader: shader.fragment
+  })
+  material.extensions.derivatives = true
 
-         material = new THREE.ShaderMaterial( {
-            uniforms: uniforms,
-            vertexShader: shader.vertex,
-            fragmentShader: shader.fragment
-        } );
-        material.extensions.derivatives = true;
+  var mesh = new THREE.Mesh(geometry, material)
+  scene.add(mesh)
+  renderer = new THREE.WebGLRenderer()
+  //renderer.setPixelRatio( window.devicePixelRatio );
+  container.appendChild(renderer.domElement)
+  onWindowResize()
+  window.addEventListener('resize', onWindowResize, false)
+}
+function onWindowResize(event) {
+  renderer.setSize(container.offsetWidth, container.offsetHeight)
+  uniforms.u_resolution.value.x = renderer.domElement.width
+  uniforms.u_resolution.value.y = renderer.domElement.height
+}
+function animate(delta) {
+  requestAnimationFrame(animate)
+  render(delta)
+}
+function render(delta) {
+  uniforms.u_time.value = -10000 + delta * 0.0005
+  renderer.render(scene, camera)
+}
 
+onMounted(() => {
+  load()
+})
 
-        var mesh = new THREE.Mesh( geometry, material );
-        scene.add( mesh );
-        renderer = new THREE.WebGLRenderer();
-        container.appendChild( renderer.domElement );
-        onWindowResize();
-        window.addEventListener( 'resize', onWindowResize, false );
-    }
+defineExpose({
+  animate
+})
+</script>
 
-    function onWindowResize( event ) {
-        renderer.setSize( container.offsetWidth, container.offsetHeight );
-        uniforms.u_resolution.value.x = renderer.domElement.width;
-        uniforms.u_resolution.value.y = renderer.domElement.height;
-    }
-
-    export function animate(delta) {
-        requestAnimationFrame( animate );
-        render(delta);
-    }
-
-    function render(delta) {
-        uniforms.u_time.value = -10000 + delta * 0.0005;
-        renderer.render( scene, camera );
-    }
-
+<template>
+  <div class="radio-background" id="bg-37"></div>
+</template>

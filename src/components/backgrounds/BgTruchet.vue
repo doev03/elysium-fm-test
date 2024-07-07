@@ -1,7 +1,7 @@
-console.clear();
-
-import { FragmentShader, Texture, Uniform, DollyCamera } from 'https://cdn.skypack.dev/wtc-gl@1.0.0-beta.51';
-import { Vec2, Vec3, Mat4 } from "https://cdn.skypack.dev/wtc-math@1.0.17";
+<script setup>
+import { onMounted } from 'vue'
+import { FragmentShader, Uniform, DollyCamera } from 'wtc-gl'
+import { Vec3 } from 'wtc-math'
 
 const fragment = `#version 300 es
   precision highp float;
@@ -18,7 +18,7 @@ const fragment = `#version 300 es
   /* Shading constants */
   /* --------------------- */
   const vec3 LP = vec3(-0.6, 0.7, -0.3);  // light position
-  const vec3 LC = vec3(.85,0.80,0.70);    // light colour
+  const vec3 LC = vec3(0.85,0.10,0.07);    // light colour
   const vec3 HC1 = vec3(.5, .4, .3);      // hemisphere light colour 1
   const vec3 HC2 = vec3(0.1,.1,.6)*.5;    // hemisphere light colour 2
   const vec3 HLD = vec3(0,1,0)*.5+.5;     // hemisphere light direction
@@ -30,9 +30,9 @@ const fragment = `#version 300 es
   const float FS = .3;                     // fresnel strength
   /* Raymarching constants */
   /* --------------------- */
-  const float MAX_TRACE_DISTANCE = 10.;             // max trace distance
+  const float MAX_TRACE_DISTANCE = 20.;             // max trace distance
   const float INTERSECTION_PRECISION = 0.001;       // precision of the intersection
-  const int NUM_OF_TRACE_STEPS = 256;               // max number of trace steps
+  const int NUM_OF_TRACE_STEPS = 32;               // max number of trace steps
   const float STEP_MULTIPLIER = .9;                 // the step mutliplier - ie, how much further to progress on each step
   
   /* Structures */
@@ -240,7 +240,7 @@ const fragment = `#version 300 es
     float f = pow( clamp(1.0+dot(nor,cam.rd),0.0,1.0), 2.0 )*FS; // fresnel component
     // float spe = pow(clamp( dot( ref, l ), 0.0, 1.0 ),16.0); // specular component
 
-    vec3 c = vec3(0.0);
+    vec3 c = normalize(cam.ro);
     c += d*LC;                           // diffuse light integration
     c += mix(HC1,HC2,dot(nor, HLD))*AS;        // hemisphere light integration (ambient)
     c += b*BC*o;       // back light component
@@ -280,8 +280,8 @@ const fragment = `#version 300 es
     Surface surface = march(cam);
     
     c = vec4(render(surface, cam, uv), 1.);
-  }
-`;
+  }`
+
 const vertex = `#version 300 es
 in vec3 position;
 in vec2 uv;
@@ -289,52 +289,44 @@ out vec2 v_uv;
 void main() {
 gl_Position = vec4(position, 1.0);
 v_uv = uv;
-}
-`
+}`
 
-
-// Load the image into the uniform
-const img = new Image();
-img.crossOrigin = "anonymous";
-img.src = "./noise.png";
-
-export function animate() {
-  const camera = new DollyCamera({}, { far: 1000 });
+function init() {
+  const camera = new DollyCamera(
+    { enabled: true, autoRotate: true, rotateSpeed: 0.1, panSpeed: 0.1, enableZoom: false },
+    { far: 1000 }
+  )
 
   const cp = new Uniform({
-    name: "cp",
+    name: 'cp',
     value: [50, 50, 100],
-    kind: "vec3"
+    kind: 'vec3'
   })
 
-  // Create the fragment shader wrapper
-  const FSWrapper = new FragmentShader({
+  const container = document.getElementById('bg-truchet')
+
+  new FragmentShader({
     fragment,
     vertex,
+    container,
+    uniforms: {
+      u_cp: cp
+    },
     onBeforeRender: (t) => {
-      camera.update();
+      camera.update()
 
-      cp.value = camera.position.multiplyNew(new Vec3(-1, 1, 1)).array;
+      cp.value = camera.position.multiplyNew(new Vec3(-1, 1, 5)).add(new Vec3(10, 10, 10)).array
     }
-  });
-  FSWrapper.playing = false;
+  })
 
-  const { gl, uniforms } = FSWrapper;
-
-  camera.setPosition(100, 100, -200.);
-  uniforms.u_cp = cp;
-
-  // Create the texture
-  const texture = new Texture(gl, {
-    wrapS: gl.REPEAT,
-    wrapT: gl.REPEAT
-  });
-
-  uniforms.s_noise = new Uniform({
-    name: "noise",
-    value: texture,
-    kind: "texture"
-  });
-
-  FSWrapper.playing = true; (texture.image = img);
+  camera.setPosition(100, 100, 200)
 }
+
+onMounted(() => {
+  init()
+})
+</script>
+
+<template>
+  <div class="radio-background" id="bg-truchet" />
+</template>
