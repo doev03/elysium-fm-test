@@ -220,7 +220,6 @@ function onWindowResize(event) {
   uniforms.u_resolution.value.y = renderer.domElement.height
 }
 function animate(delta) {
-  console.log('animate')
   requestAnimationFrame(animate)
   render(delta)
 }
@@ -230,6 +229,7 @@ function render(delta) {
 }
 
 onMounted(() => {
+  console.log('Bg25 mounted')
   load()
 })
 

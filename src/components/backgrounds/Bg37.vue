@@ -489,6 +489,7 @@ function render(delta) {
 }
 
 onMounted(() => {
+  console.log('Bg37 mounted')
   load()
 })
 

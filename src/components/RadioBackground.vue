@@ -13,7 +13,6 @@ const backgroundComponent = ref(null)
 
 onUpdated(() => {
   if (props.show) {
-    console.log(backgroundComponent.value)
     backgroundComponent.value.animate()
   }
 })
@@ -21,11 +20,8 @@ onUpdated(() => {
 
 <template>
   <Transition>
-    <component
-      :class="{ 'fade-in': props.show, 'fade-out': !props.show }"
-      ref="backgroundComponent"
-      :is="randBackground"
-    >
+    <component :class="{ 'fade-in': props.show, 'fade-out': !props.show }" ref="backgroundComponent"
+      :is="randBackground">
     </component>
   </Transition>
 </template>
